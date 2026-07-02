@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Needs or Wants?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-top:#EAF7F0;
+    --bg-bottom:#E6F2FF;
+    --needs:#1D7A5F;
+    --needs-dark:#125942;
+    --wants:#FF5C8A;
+    --wants-dark:#D63A67;
+    --gold:#FFC93C;
+    --ink:#1E2A45;
+    --paper:#FFFFFF;
+    --shadow: rgba(30,42,69,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:linear-gradient(160deg,var(--bg-top) 0%, var(--bg-bottom) 100%);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 14px 40px;
+    overflow-x:hidden;
+  }
+  h1{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:clamp(28px,6vw,42px);
+    margin:6px 0 2px;
+    text-align:center;
+    color:var(--ink);
+    letter-spacing:0.5px;
+  }
+  .subtitle{
+    font-weight:700;
+    color:#5A6A8A;
+    margin-bottom:10px;
+    text-align:center;
+    font-size:15px;
+  }
+
+  .level-badge{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:14px;
+    color:var(--ink);
+    background:var(--gold);
+    padding:5px 18px;
+    border-radius:999px;
+    box-shadow:0 4px 10px var(--shadow);
+    margin-bottom:18px;
+    letter-spacing:0.5px;
+  }
+
+  .trail{
+    display:flex;
+    gap:7px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+    justify-content:center;
+    max-width:520px;
+  }
+  .coin{
+    width:24px;height:24px;border-radius:50%;
+    background:#D9E4F0;
+    border:2px solid #C3D2E6;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;
+    font-weight:700;
+    transition:all .35s ease;
+  }
+  .coin.done{ background:var(--gold); border-color:#E0A800; transform:scale(1.05);}
+  .coin.current{ box-shadow:0 0 0 4px rgba(255,201,60,0.35); }
+
+  .scoreboard{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    background:var(--paper);
+    padding:6px 16px;
+    border-radius:999px;
+    box-shadow:0 4px 10px var(--shadow);
+    margin-bottom:26px;
+  }
+
+  .stage{
+    width:100%;
+    max-width:680px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .prompt{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:19px;
+    margin-bottom:16px;
+    text-align:center;
+    color:var(--ink);
+  }
+
+  .cards{
+    display:flex;
+    gap:18px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:38px;
+    min-height:150px;
+  }
+
+  .card{
+    width:140px;
+    background:var(--paper);
+    border-radius:20px;
+    padding:18px 10px 14px;
+    box-shadow:0 8px 18px var(--shadow);
+    text-align:center;
+    cursor:pointer;
+    border:3px solid transparent;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, opacity .3s ease;
+    user-select:none;
+    position:relative;
+  }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 12px 22px var(--shadow); }
+  .card.selected{
+    border-color:var(--gold);
+    transform:translateY(-6px) scale(1.03);
+    box-shadow:0 14px 24px var(--shadow);
+  }
+  .card.placed{
+    opacity:0;
+    pointer-events:none;
+    transform:scale(.3);
+  }
+  .card .emoji{ font-size:44px; display:block; margin-bottom:8px; }
+  .card .name{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; line-height:1.25; }
+
+  .card.shake{ animation:shake .4s ease; }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-8px);}
+    40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
+
+  .baskets{
+    display:flex;
+    gap:50px;
+    width:100%;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+
+  .basket-wrap{
+    position:relative;
+    width:220px;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .basket-wrap:hover{ transform:translateY(-3px); }
+
+  .basket-svg{
+    width:100%;
+    height:auto;
+    display:block;
+    filter:drop-shadow(0 10px 14px var(--shadow));
+    transition:filter .2s ease;
+  }
+  .basket-svg.flash-good{ animation:goodFlash .5s ease; }
+  .basket-svg.flash-bad{ animation:badFlash .5s ease; }
+  @keyframes goodFlash{ 0%,100%{filter:drop-shadow(0 10px 14px var(--shadow)) brightness(1);} 50%{filter:drop-shadow(0 10px 14px var(--shadow)) brightness(1.4);} }
+  @keyframes badFlash{ 0%,100%{filter:drop-shadow(0 10px 14px var(--shadow)) brightness(1);} 50%{filter:drop-shadow(0 10px 14px var(--shadow)) brightness(0.65);} }
+
+  .basket-label{
+    position:absolute;
+    top:52%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-3deg);
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:19px;
+    color:#fff;
+    padding:6px 18px;
+    border-radius:6px;
+    z-index:2;
+    letter-spacing:0.5px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);
+  }
+  .basket-label::before, .basket-label::after{
+    content:"";
+    position:absolute;
+    top:0;
+    width:0; height:0;
+    border-top:16px solid transparent;
+    border-bottom:16px solid transparent;
+  }
+  .basket-label::before{
+    left:-11px;
+    border-right:11px solid var(--ribbon-dark, #000);
+  }
+  .basket-label::after{
+    right:-11px;
+    border-left:11px solid var(--ribbon-dark, #000);
+  }
+  .wrap-needs .basket-label{ background:var(--needs); --ribbon-dark:var(--needs-dark); }
+  .wrap-wants .basket-label{ background:var(--wants); --ribbon-dark:var(--wants-dark); }
+
+  .basket-counter{
+    position:absolute;
+    bottom:14px;
+    right:16px;
+    background:rgba(255,255,255,0.92);
+    color:var(--ink);
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    padding:3px 9px;
+    border-radius:999px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.2);
+    z-index:2;
+  }
+
+  .plus-one{
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:20px;
+    color:var(--gold);
+    text-shadow:0 2px 3px rgba(0,0,0,0.35);
+    pointer-events:none;
+    animation:floatUp .8s ease forwards;
+    z-index:3;
+  }
+  @keyframes floatUp{
+    0%{ opacity:0; transform:translate(-50%,10px) scale(0.7); }
+    30%{ opacity:1; transform:translate(-50%,-10px) scale(1.1); }
+    100%{ opacity:0; transform:translate(-50%,-46px) scale(1); }
+  }
+
+  .feedback{
+    margin-top:24px;
+    text-align:center;
+    max-width:520px;
+    min-height:48px;
+  }
+  .feedback .line1{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    color:var(--ink);
+    display:block;
+  }
+  .feedback .line2{
+    font-weight:600;
+    font-size:14px;
+    color:#5A6A8A;
+    display:block;
+    margin-top:3px;
+  }
+
+  .end-screen, .transition-screen{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    max-width:480px;
+  }
+  .end-screen h2, .transition-screen h2{
+    font-family:'Baloo 2',sans-serif;
+    font-size:30px;
+    margin-bottom:6px;
+  }
+  .end-score{
+    font-family:'Baloo 2',sans-serif;
+    font-size:52px;
+    font-weight:800;
+    color:var(--gold);
+    text-shadow:0 3px 0 var(--ink);
+    margin:14px 0;
+  }
+  .end-msg, .transition-msg{ font-weight:700; color:#5A6A8A; margin-bottom:22px; font-size:16px; line-height:1.5; }
+
+  button.replay{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    background:var(--needs);
+    color:#fff;
+    border:none;
+    padding:12px 28px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(29,122,95,0.4);
+    transition:transform .15s ease;
+  }
+  button.replay:hover{ transform:translateY(-2px); }
+
+  button.continue-btn{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    background:var(--wants);
+    color:#fff;
+    border:none;
+    padding:12px 28px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(255,92,138,0.4);
+    transition:transform .15s ease;
+  }
+  button.continue-btn:hover{ transform:translateY(-2px); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  @media (max-width:480px){
+    .baskets{ gap:24px; }
+    .basket-wrap{ width:165px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- shared SVG weave patterns, referenced by both baskets -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <pattern id="weaveBase" width="13" height="13" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="13" height="13" fill="#CD9C63"/>
+      <rect width="6.5" height="13" fill="#B9824A"/>
+    </pattern>
+    <pattern id="weaveCross" width="13" height="13" patternTransform="rotate(-45)" patternUnits="userSpaceOnUse">
+      <rect width="13" height="13" fill="transparent"/>
+      <rect width="6.5" height="13" fill="rgba(70,40,10,0.16)"/>
+    </pattern>
+  </defs>
+</svg>
+
+<h1>Needs or Wants?</h1>
+<div class="subtitle">Sort each item into the right basket 🧺</div>
+<div class="level-badge" id="levelBadge">Level 1</div>
+
+<div class="scoreboard" id="scoreboard">Round 1 of 9 · Score: 0</div>
+<div class="trail" id="trail"></div>
+
+<div class="stage" id="stage">
+  <div class="prompt" id="prompt">Tap an item, then tap the basket it belongs in</div>
+  <div class="cards" id="cards"></div>
+  <div class="baskets">
+    <div class="basket-wrap wrap-needs" id="wrapNeeds" data-basket="needs">
+      <svg class="basket-svg" id="svgNeeds" viewBox="0 0 220 210" xmlns="http://www.w3.org/2000/svg">
+        <path d="M55,92 C55,18 165,18 165,92" fill="none" stroke="#8B5A2B" stroke-width="12" stroke-linecap="round"/>
+        <path d="M55,92 C55,18 165,18 165,92" fill="none" stroke="#A9722F" stroke-width="12" stroke-linecap="round" stroke-dasharray="3 6" opacity="0.55"/>
+        <path d="M30,96 C30,89 190,89 190,96 L172,196 C172,207 48,207 48,196 Z" fill="url(#weaveBase)" stroke="#8B5A2B" stroke-width="3"/>
+        <path d="M30,96 C30,89 190,89 190,96 L172,196 C172,207 48,207 48,196 Z" fill="url(#weaveCross)"/>
+        <path d="M30,96 C30,89 190,89 190,96 L172,196 C172,207 48,207 48,196 Z" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+        <ellipse cx="110" cy="96" rx="80" ry="13" fill="url(#weaveBase)" stroke="#8B5A2B" stroke-width="3"/>
+        <ellipse cx="110" cy="96" rx="80" ry="13" fill="url(#weaveCross)"/>
+        <ellipse cx="110" cy="93" rx="76" ry="10" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      </svg>
+      <div class="basket-label">NEEDS</div>
+      <div class="basket-counter" id="needsCounter">0 items</div>
+    </div>
+    <div class="basket-wrap wrap-wants" id="wrapWants" data-basket="wants">
+      <svg class="basket-svg" id="svgWants" viewBox="0 0 220 210" xmlns="http://www.w3.org/2000/svg">
+        <path d="M55,92 C55,18 165,18 165,92" fill="none" stroke="#8B5A2B" stroke-width="12" stroke-linecap="round"/>
+        <path d="M55,92 C55,18 165,18 165,92" fill="none" stroke="#A9722F" stroke-width="12" stroke-linecap="round" stroke-dasharray="3 6" opacity="0.55"/>
+        <path d="M30,96 C30,89 190,89 190,96 L172,196 C172,207 48,207 48,196 Z" fill="url(#weaveBase)" stroke="#8B5A2B" stroke-width="3"/>
+        <path d="M30,96 C30,89 190,89 190,96 L172,196 C172,207 48,207 48,196 Z" fill="url(#weaveCross)"/>
+        <path d="M30,96 C30,89 190,89 190,96 L172,196 C172,207 48,207 48,196 Z" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+        <ellipse cx="110" cy="96" rx="80" ry="13" fill="url(#weaveBase)" stroke="#8B5A2B" stroke-width="3"/>
+        <ellipse cx="110" cy="96" rx="80" ry="13" fill="url(#weaveCross)"/>
+        <ellipse cx="110" cy="93" rx="76" ry="10" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      </svg>
+      <div class="basket-label">WANTS</div>
+      <div class="basket-counter" id="wantsCounter">0 items</div>
+    </div>
+  </div>
+  <div class="feedback" id="feedback"><span class="line1">&nbsp;</span></div>
+</div>
+
+<div class="transition-screen" id="transitionScreen">
+  <h2>Great job! 🎉</h2>
+  <div class="transition-msg">Great job identifying the basics! But what happens when things aren't so clear-cut? Let's make it a little harder.....</div>
+  <button class="continue-btn" onclick="startLevel2()">Start Level 2</button>
+</div>
+
+<div class="end-screen" id="endScreen">
+  <h2>Level Complete! 🎉</h2>
+  <div class="end-score" id="endScore">0/9</div>
+  <div class="end-msg" id="endMsg">right on your first try</div>
+  <button class="replay" onclick="restartGame()">Play Again</button>
+</div>
+
+<script>
+const level1Rounds = [
+  { need: { name:"Water", emoji:"💧", why:"Your body needs water every day to stay healthy." },
+    want: { name:"Trendy Bottled Water", emoji:"🥤", why:"It's just fancy packaging — plain water works fine too." } },
+
+  { need: { name:"Groceries", emoji:"🛒", why:"Food from the store is what keeps your family fed." },
+    want: { name:"Candy", emoji:"🍬", why:"Candy is a yummy treat, but your body doesn't need it." } },
+
+  { need: { name:"Home-Cooked Meal", emoji:"🍲", why:"A home-cooked meal feeds you using food you already have." },
+    want: { name:"Restaurant Meals", emoji:"🍽️", why:"Eating out is fun, but it's a treat, not an everyday need." } },
+
+  { need: { name:"Shoes", emoji:"👞", why:"Shoes protect your feet — you need a pair every day." },
+    want: { name:"Limited Edition Sneakers", emoji:"👟", why:"Cool sneakers are exciting, but plain shoes do the same job." } },
+
+  { need: { name:"Computer for Homework", emoji:"💻", why:"You need a computer to do your schoolwork." },
+    want: { name:"Gaming Console", emoji:"🎮", why:"A gaming console is just for fun, not for school." } },
+
+  { need: { name:"Phone", emoji:"📱", why:"A phone helps you stay in touch with your family." },
+    want: { name:"Latest Smartphone", emoji:"📲", why:"The newest phone is exciting, but your old one still works." } },
+
+  { need: { name:"Shelter", emoji:"🏠", why:"Everyone needs a safe place to live." },
+    want: { name:"Mansion with a Pool", emoji:"🏰", why:"A giant mansion is way more house than anyone needs." } },
+
+  { need: { name:"Reliable Family Car", emoji:"🚗", why:"A working car gets your family to school and work." },
+    want: { name:"Luxury Sports Car", emoji:"🏎️", why:"A fancy sports car does the same job as a regular one." } },
+
+  { need: { name:"Bicycle", emoji:"🚲", why:"A bike can help you get around your neighborhood." },
+    want: { name:"Motorbike (Just for Fun)", emoji:"🏍️", why:"This one's just for fun, not for getting where you need to go." } },
+];
+
+const level2Rounds = [
+  { need: { name:"Watch", emoji:"⌚", why:"A watch helps you know the time for school and activities." },
+    want: { name:"Smart Watch", emoji:"⌚📲", why:"A smart watch does fun extra things, but a plain watch tells time too." } },
+
+  { need: { name:"Book", emoji:"📖", why:"You need books for schoolwork and reading assignments." },
+    want: { name:"Digital Subscriptions", emoji:"📲🎬", why:"Streaming and game subscriptions are fun, but you don't need them." } },
+
+  { need: { name:"School Supplies", emoji:"✏️", why:"You need pencils, paper, and supplies to do your schoolwork." },
+    want: { name:"Trading Cards", emoji:"🃏", why:"Trading cards are fun to collect, but you don't need them for school." } },
+
+  { need: { name:"Lunch Money", emoji:"🍱", why:"You need money for lunch so you can eat during the school day." },
+    want: { name:"Cool Graphic T-Shirt", emoji:"👕", why:"A cool shirt is fun to have, but any shirt keeps you dressed." } },
+
+  { need: { name:"Bus Fare", emoji:"🚌", why:"Bus fare gets you to school and back — that's a real need." },
+    want: { name:"Trendy Bicycle", emoji:"🚲✨", why:"A trendy bike is fun to ride, but the bus already gets you to school." } },
+];
+
+const goodMsgs = [
+  "Yes! Great choice!",
+  "You got it!",
+  "Awesome job!",
+  "Nice thinking!",
+  "That's exactly right!"
+];
+const retryMsgs = [
+  "Not quite — try the other basket!",
+  "Almost! Give it one more try.",
+  "Oops, try the other basket!",
+  "Close! Think about it and try again."
+];
+
+let currentLevel = 1;
+let rounds = level1Rounds;
+let roundIndex = 0;
+let selectedItem = null;
+let placedThisRound = 0;
+let score = 0;
+let firstTryCorrect = [false, false];
+let needsCount = 0;
+let wantsCount = 0;
+
+const stage = document.getElementById('stage');
+const cardsEl = document.getElementById('cards');
+const scoreboard = document.getElementById('scoreboard');
+const trailEl = document.getElementById('trail');
+const feedbackEl = document.getElementById('feedback');
+const wrapNeeds = document.getElementById('wrapNeeds');
+const wrapWants = document.getElementById('wrapWants');
+const svgNeeds = document.getElementById('svgNeeds');
+const svgWants = document.getElementById('svgWants');
+const needsCounter = document.getElementById('needsCounter');
+const wantsCounter = document.getElementById('wantsCounter');
+const endScreen = document.getElementById('endScreen');
+const transitionScreen = document.getElementById('transitionScreen');
+const endScore = document.getElementById('endScore');
+const endMsg = document.getElementById('endMsg');
+const levelBadge = document.getElementById('levelBadge');
+
+function buildTrail(){
+  trailEl.innerHTML = '';
+  rounds.forEach((_, i) => {
+    const c = document.createElement('div');
+    c.className = 'coin';
+    c.id = 'coin-' + i;
+    c.textContent = i + 1;
+    trailEl.appendChild(c);
+  });
+}
+
+function updateTrail(){
+  rounds.forEach((_, i) => {
+    const c = document.getElementById('coin-' + i);
+    c.classList.remove('current');
+    if (i < roundIndex) c.classList.add('done');
+    else c.classList.remove('done');
+    if (i === roundIndex) c.classList.add('current');
+  });
+}
+
+function loadRound(){
+  selectedItem = null;
+  placedThisRound = 0;
+  firstTryCorrect = [true, true];
+  feedbackEl.innerHTML = '<span class="line1">&nbsp;</span>';
+  cardsEl.innerHTML = '';
+
+  const r = rounds[roundIndex];
+  const items = [
+    { type:'need', name:r.need.name, emoji:r.need.emoji, why:r.need.why },
+    { type:'want', name:r.want.name, emoji:r.want.emoji, why:r.want.why }
+  ];
+  if (Math.random() > 0.5) items.reverse();
+
+  items.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.type = item.type;
+    card.dataset.idx = idx;
+    card.innerHTML = `<span class="emoji">${item.emoji}</span><span class="name">${item.name}</span>`;
+    card.addEventListener('click', () => selectCard(card, item));
+    cardsEl.appendChild(card);
+  });
+
+  scoreboard.textContent = `Round ${roundIndex + 1} of ${rounds.length} · Score: ${score}`;
+  updateTrail();
+}
+
+function selectCard(card, item){
+  if (card.classList.contains('placed')) return;
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedItem = { card, item };
+}
+
+function popPlusOne(wrapEl){
+  const p = document.createElement('div');
+  p.className = 'plus-one';
+  p.textContent = '+1';
+  wrapEl.appendChild(p);
+  setTimeout(() => p.remove(), 800);
+}
+
+function handleBasketClick(basketType){
+  if (!selectedItem) {
+    feedbackEl.innerHTML = '<span class="line1">Tap an item first!</span>';
+    return;
+  }
+  const { card, item } = selectedItem;
+  const correctBasket = item.type === 'need' ? 'needs' : 'wants';
+  const svgEl = basketType === 'needs' ? svgNeeds : svgWants;
+  const wrapEl = basketType === 'needs' ? wrapNeeds : wrapWants;
+
+  if (basketType === correctBasket) {
+    svgEl.classList.remove('flash-bad');
+    void svgEl.offsetWidth;
+    svgEl.classList.add('flash-good');
+    popPlusOne(wrapEl);
+
+    if (basketType === 'needs') { needsCount++; needsCounter.textContent = needsCount + (needsCount===1 ? ' item' : ' items'); }
+    else { wantsCount++; wantsCounter.textContent = wantsCount + (wantsCount===1 ? ' item' : ' items'); }
+
+    card.classList.add('placed');
+    placedThisRound++;
+
+    const idx = parseInt(card.dataset.idx);
+    if (firstTryCorrect[idx]) score++;
+
+    feedbackEl.innerHTML = `<span class="line1">${goodMsgs[Math.floor(Math.random() * goodMsgs.length)]}</span><span class="line2">${item.why}</span>`;
+    selectedItem = null;
+    scoreboard.textContent = `Round ${roundIndex + 1} of ${rounds.length} · Score: ${score}`;
+
+    if (placedThisRound === 2) {
+      setTimeout(nextRound, 1400);
+    }
+  } else {
+    svgEl.classList.remove('flash-good');
+    void svgEl.offsetWidth;
+    svgEl.classList.add('flash-bad');
+    card.classList.remove('selected');
+    card.classList.add('shake');
+    setTimeout(() => card.classList.remove('shake'), 400);
+
+    const idx = parseInt(card.dataset.idx);
+    firstTryCorrect[idx] = false;
+
+    feedbackEl.innerHTML = `<span class="line1">${retryMsgs[Math.floor(Math.random() * retryMsgs.length)]}</span>`;
+    selectedItem = null;
+  }
+}
+
+wrapNeeds.addEventListener('click', () => handleBasketClick('needs'));
+wrapWants.addEventListener('click', () => handleBasketClick('wants'));
+
+function nextRound(){
+  roundIndex++;
+  if (roundIndex >= rounds.length) {
+    if (currentLevel === 1) {
+      showTransition();
+    } else {
+      showEnd();
+    }
+  } else {
+    loadRound();
+  }
+}
+
+function showTransition(){
+  updateTrail();
+  stage.style.display = 'none';
+  transitionScreen.style.display = 'flex';
+}
+
+function startLevel2(){
+  currentLevel = 2;
+  rounds = level2Rounds;
+  roundIndex = 0;
+  score = 0;
+  needsCount = 0;
+  wantsCount = 0;
+  needsCounter.textContent = '0 items';
+  wantsCounter.textContent = '0 items';
+  levelBadge.textContent = 'Level 2';
+  transitionScreen.style.display = 'none';
+  stage.style.display = 'flex';
+  buildTrail();
+  loadRound();
+}
+
+function showEnd(){
+  updateTrail();
+  stage.style.display = 'none';
+  endScreen.style.display = 'flex';
+  endScore.textContent = `${score}/${rounds.length}`;
+  let msg;
+  if (score === rounds.length) msg = "Perfect score — you really know your needs from your wants, even the tricky ones!";
+  else if (score >= rounds.length - 1) msg = "Great job! You got most of them right away, even on the harder level.";
+  else msg = "Nice work! These ones were trickier — keep practicing and you'll spot the difference every time.";
+  endMsg.textContent = msg;
+}
+
+function restartGame(){
+  currentLevel = 1;
+  rounds = level1Rounds;
+  roundIndex = 0;
+  score = 0;
+  needsCount = 0;
+  wantsCount = 0;
+  needsCounter.textContent = '0 items';
+  wantsCounter.textContent = '0 items';
+  levelBadge.textContent = 'Level 1';
+  stage.style.display = 'flex';
+  endScreen.style.display = 'none';
+  transitionScreen.style.display = 'none';
+  buildTrail();
+  loadRound();
+}
+
+buildTrail();
+loadRound();
+</script>
+</body>
+</html>
